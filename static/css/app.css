@@ -1,0 +1,170 @@
+/* RemoteGenerationService Custom Styles */
+
+/* --- Status badges --- */
+.badge {
+  display: inline-block;
+  padding: 0.15rem 0.5rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.badge-mock    { background: rgba(234, 179, 8, 0.2);  color: #eab308; border: 1px solid #eab308; }
+.badge-real    { background: rgba(34, 197, 94, 0.2);  color: #22c55e; border: 1px solid #22c55e; }
+.badge-pending   { background: rgba(148, 163, 184, 0.2); color: #94a3b8; }
+.badge-running   { background: rgba(59, 130, 246, 0.2);  color: #3b82f6; border: 1px solid #3b82f6; }
+.badge-completed { background: rgba(34, 197, 94, 0.2);   color: #22c55e; }
+.badge-failed    { background: rgba(239, 68, 68, 0.2);   color: #ef4444; }
+.badge-cancelled { background: rgba(148, 163, 184, 0.2); color: #94a3b8; }
+.badge-mode      { background: rgba(139, 92, 246, 0.2);  color: #8b5cf6; }
+
+/* --- Flash messages --- */
+.flash {
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+}
+.flash-info    { background: rgba(59, 130, 246, 0.15); border-left: 3px solid #3b82f6; }
+.flash-success { background: rgba(34, 197, 94, 0.15);  border-left: 3px solid #22c55e; }
+.flash-warning { background: rgba(234, 179, 8, 0.15);  border-left: 3px solid #eab308; }
+.flash-error   { background: rgba(239, 68, 68, 0.15);  border-left: 3px solid #ef4444; }
+
+/* --- Stat cards --- */
+.stats-grid {
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.stat-card {
+  background: var(--card-background-color);
+  border: 1px solid var(--card-border-color);
+  border-radius: 8px;
+  padding: 1rem;
+  text-align: center;
+}
+
+.stat-card big {
+  font-size: 2rem;
+  font-weight: 700;
+}
+
+.stat-running big   { color: #3b82f6; }
+.stat-completed big { color: #22c55e; }
+.stat-failed big    { color: #ef4444; }
+
+/* --- Settings tabs --- */
+.settings-tabs {
+  margin-bottom: 1.5rem;
+}
+
+.settings-tabs nav {
+  display: flex;
+  gap: 0.25rem;
+  border-bottom: 1px solid var(--card-border-color);
+  padding-bottom: 0.25rem;
+}
+
+.settings-tabs nav a {
+  padding: 0.4rem 1rem;
+  border-radius: 6px 6px 0 0;
+  text-decoration: none;
+  color: var(--muted-color);
+  font-size: 0.9rem;
+}
+
+.settings-tabs nav a.active {
+  background: var(--primary);
+  color: white;
+}
+
+.settings-tabs nav a:hover:not(.active) {
+  background: var(--card-background-color);
+  color: var(--color);
+}
+
+/* --- Status dots --- */
+.dot-green, .dot-red {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  margin-right: 6px;
+}
+.dot-green { background: #22c55e; }
+.dot-red   { background: #ef4444; }
+
+/* --- Spinner --- */
+.spinner {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255,255,255,0.3);
+  border-top-color: var(--primary);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  vertical-align: middle;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* --- Output viewer --- */
+.output-text pre {
+  white-space: pre-wrap;
+  word-break: break-word;
+  max-height: 400px;
+  overflow-y: auto;
+  background: var(--code-background-color);
+  padding: 1rem;
+  border-radius: 8px;
+}
+
+.image-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 1rem;
+}
+
+.image-card {
+  text-align: center;
+}
+
+.image-card img {
+  max-width: 100%;
+  border-radius: 8px;
+  display: block;
+  margin: 0 auto 0.5rem;
+}
+
+/* --- Error box --- */
+.error-box {
+  border-left: 3px solid #ef4444;
+}
+
+.error-box pre {
+  color: #ef4444;
+}
+
+/* --- Navigation --- */
+header nav > ul:first-child {
+  flex: 1;
+}
+
+/* --- Table tweaks --- */
+table {
+  font-size: 0.9rem;
+}
+
+td code {
+  font-size: 0.8rem;
+}
+
+/* --- Responsive --- */
+@media (max-width: 768px) {
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}

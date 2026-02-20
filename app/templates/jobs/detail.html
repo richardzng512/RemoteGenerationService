@@ -1,0 +1,159 @@
+{% extends "base.html" %}
+{% block title %}Job {{ job.id[:8] }} — RemoteGenerationService{% endblock %}
+
+{% block content %}
+<div x-data="jobDetail('{{ job.id }}', '{{ job.status }}')">
+  <nav aria-label="breadcrumb">
+    <ul>
+      <li><a href="/jobs">Jobs</a></li>
+      <li>{{ job.id[:8] }}...</li>
+    </ul>
+  </nav>
+
+  <div class="grid" style="grid-template-columns: 1fr auto; align-items: start;">
+    <div>
+      <h2 style="margin: 0;">
+        {{ job.job_type|upper }} Job
+        <span class="badge badge-{{ job.status }}">{{ job.status }}</span>
+        <span class="badge badge-mode">{{ job.mode }}</span>
+      </h2>
+      <small>ID: <code>{{ job.id }}</code></small>
+    </div>
+    {% if job.status in ['pending', 'running'] %}
+    <form method="POST" action="/jobs/{{ job.id }}/cancel">
+      <button type="submit" class="outline contrast">Cancel</button>
+    </form>
+    {% endif %}
+  </div>
+
+  <!-- Timing info -->
+  <div class="grid" style="margin: 1rem 0;">
+    <div><small>Created</small><br>{{ job.created_at.strftime('%Y-%m-%d %H:%M:%S') }}</div>
+    {% if job.started_at %}
+    <div><small>Started</small><br>{{ job.started_at.strftime('%Y-%m-%d %H:%M:%S') }}</div>
+    {% endif %}
+    {% if job.completed_at %}
+    <div><small>Completed</small><br>{{ job.completed_at.strftime('%Y-%m-%d %H:%M:%S') }}</div>
+    {% endif %}
+    {% if job.duration_seconds is not none %}
+    <div><small>Duration</small><br>{{ "%.1f"|format(job.duration_seconds) }}s</div>
+    {% endif %}
+  </div>
+
+  <!-- Live Progress (for running jobs) -->
+  {% if job.status in ['pending', 'running'] %}
+  <article id="progress-section">
+    <header><strong>Progress</strong></header>
+    <progress id="progress-bar" value="{{ job.progress }}" max="100"></progress>
+    <small id="progress-msg">{{ job.progress_message or 'Waiting...' }}</small>
+    <p><small><em>Auto-refreshes via live connection</em></small></p>
+  </article>
+  {% endif %}
+
+  <!-- Error -->
+  {% if job.error_message %}
+  <article class="error-box">
+    <header><strong>Error</strong></header>
+    <pre>{{ job.error_message }}</pre>
+  </article>
+  {% endif %}
+
+  <!-- Output -->
+  {% if job.status == 'completed' %}
+  <article>
+    <header><strong>Output</strong></header>
+
+    {% if job.job_type == 'llm' and job.result_text %}
+    <div class="output-text">
+      <pre>{{ job.result_text }}</pre>
+      <button onclick="navigator.clipboard.writeText(this.previousElementSibling.textContent)"
+        class="outline" style="margin-top: 0.5rem;">Copy</button>
+    </div>
+
+    {% elif job.job_type == 'image' and job.result_files %}
+    <div class="image-grid">
+      {% for f in job.result_files %}
+      {% set fname = f.split('/')[-1].split('\\')[-1] %}
+      {% if f.startswith('/') or f.startswith('http') %}
+        <div class="image-card">
+          <img src="{{ f }}" alt="Generated image" loading="lazy">
+          <a href="{{ f }}" download class="outline" role="button">Download</a>
+        </div>
+      {% else %}
+        <div class="image-card">
+          <img src="/api/files/{{ job.id }}/{{ fname }}" alt="Generated image" loading="lazy">
+          <a href="/api/files/{{ job.id }}/{{ fname }}" download="{{ fname }}" class="outline" role="button">Download</a>
+        </div>
+      {% endif %}
+      {% endfor %}
+    </div>
+
+    {% elif job.job_type == 'video' and job.result_files %}
+    <div>
+      {% for f in job.result_files %}
+      {% set fname = f.split('/')[-1].split('\\')[-1] %}
+      <div style="margin-bottom: 1rem;">
+        <video controls style="max-width: 100%; border-radius: 8px;">
+          <source src="/api/files/{{ job.id }}/{{ fname }}">
+          Your browser does not support the video tag.
+        </video>
+        <br>
+        <a href="/api/files/{{ job.id }}/{{ fname }}" download="{{ fname }}" class="outline" role="button">
+          Download {{ fname }}
+        </a>
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+  </article>
+
+  <!-- Transfer -->
+  <article>
+    <header><strong>File Transfer</strong></header>
+    {% if job.transfer_status == 'transferred' %}
+      <p>✅ Transferred to: <code>{{ job.transfer_path }}</code></p>
+    {% else %}
+      <form hx-post="/api/files/{{ job.id }}/transfer"
+            hx-target="#transfer-result"
+            hx-swap="innerHTML">
+        <button type="submit" class="outline">Push to Share / Get Link</button>
+      </form>
+      <div id="transfer-result"></div>
+    {% endif %}
+  </article>
+  {% endif %}
+
+  <!-- Request payload -->
+  <details>
+    <summary>Request Payload</summary>
+    <pre style="overflow: auto; max-height: 300px;">{{ job.request_payload|tojson(indent=2) }}</pre>
+  </details>
+</div>
+
+{% if job.status in ['pending', 'running'] %}
+<script>
+(function() {
+  const jobId = "{{ job.id }}";
+  const evtSource = new EventSource(`/api/jobs/${jobId}/progress`);
+
+  evtSource.onmessage = function(e) {
+    const data = JSON.parse(e.data);
+    const bar = document.getElementById('progress-bar');
+    const msg = document.getElementById('progress-msg');
+    if (bar) bar.value = data.progress || 0;
+    if (msg) msg.textContent = data.progress_message || '';
+
+    if (['completed', 'failed', 'cancelled'].includes(data.status)) {
+      evtSource.close();
+      // Reload the page to show final state
+      setTimeout(() => location.reload(), 800);
+    }
+  };
+
+  evtSource.onerror = function() {
+    evtSource.close();
+  };
+})();
+</script>
+{% endif %}
+{% endblock %}

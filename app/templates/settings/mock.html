@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+{% block title %}Mock Settings — RemoteGenerationService{% endblock %}
+
+{% block content %}
+<h1>Settings</h1>
+
+<div class="settings-tabs">
+  <nav>
+    <a href="/settings">General</a>
+    <a href="/settings/mock" class="active">Mock</a>
+    <a href="/settings/models">Models</a>
+    <a href="/settings/transfer">Transfer</a>
+  </nav>
+</div>
+
+<article>
+  <header><strong>Mock Behavior</strong></header>
+  <form method="POST" action="/settings/save">
+    <input type="hidden" name="tab" value="mock">
+    <div class="grid">
+      <label>
+        LLM Delay Min (s)
+        <input type="number" name="mock_llm_delay_min" value="{{ settings.mock_llm_delay_min }}" min="0" step="0.1">
+      </label>
+      <label>
+        LLM Delay Max (s)
+        <input type="number" name="mock_llm_delay_max" value="{{ settings.mock_llm_delay_max }}" min="0" step="0.1">
+      </label>
+    </div>
+    <div class="grid">
+      <label>
+        Image Delay Min (s)
+        <input type="number" name="mock_image_delay_min" value="{{ settings.mock_image_delay_min }}" min="0" step="0.1">
+      </label>
+      <label>
+        Image Delay Max (s)
+        <input type="number" name="mock_image_delay_max" value="{{ settings.mock_image_delay_max }}" min="0" step="0.1">
+      </label>
+    </div>
+    <div class="grid">
+      <label>
+        Video Delay Min (s)
+        <input type="number" name="mock_video_delay_min" value="{{ settings.mock_video_delay_min }}" min="0" step="0.1">
+      </label>
+      <label>
+        Video Delay Max (s)
+        <input type="number" name="mock_video_delay_max" value="{{ settings.mock_video_delay_max }}" min="0" step="0.1">
+      </label>
+    </div>
+    <label>
+      Error Rate (0.0 = no errors, 1.0 = always error)
+      <input type="range" name="mock_error_rate" value="{{ settings.mock_error_rate }}"
+             min="0" max="1" step="0.01"
+             oninput="this.nextElementSibling.textContent = (this.value * 100).toFixed(0) + '%'">
+      <output>{{ (settings.mock_error_rate * 100)|int }}%</output>
+    </label>
+    <button type="submit">Save</button>
+  </form>
+</article>
+
+<!-- Response Templates -->
+<article x-data="templates()">
+  <header>
+    <strong>Response Templates</strong>
+    <button @click="showAdd = !showAdd" class="outline" style="float:right; margin: 0;">
+      + Add Template
+    </button>
+  </header>
+
+  <!-- Add form -->
+  <div x-show="showAdd" style="margin-bottom: 1rem; padding: 1rem; background: var(--card-background-color); border-radius: 8px;">
+    <form hx-post="/api/settings/templates"
+          hx-target="#template-list"
+          hx-swap="innerHTML"
+          @htmx:after-request="showAdd = false; $el.reset()">
+      <div class="grid">
+        <label>
+          Name
+          <input type="text" name="name" placeholder="My LLM template" required>
+        </label>
+        <label>
+          Type
+          <select name="job_type">
+            <option value="llm">LLM</option>
+            <option value="image">Image</option>
+            <option value="video">Video</option>
+          </select>
+        </label>
+      </div>
+      <label>
+        Content (for LLM: response text; for image/video: file path to return)
+        <textarea name="template_content" rows="4" required></textarea>
+      </label>
+      <div class="grid">
+        <button type="submit">Save Template</button>
+        <button type="button" class="outline" @click="showAdd = false">Cancel</button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Template List -->
+  <div id="template-list"
+    hx-get="/api/settings/templates-partial"
+    hx-trigger="load"
+    hx-swap="innerHTML">
+    <div><span class="spinner"></span> Loading...</div>
+  </div>
+</article>
+
+<script>
+function templates() {
+  return { showAdd: false };
+}
+</script>
+{% endblock %}

@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}Settings — RemoteGenerationService{% endblock %}
+
+{% block content %}
+<h1>Settings</h1>
+
+<div class="settings-tabs">
+  <nav>
+    <a href="/settings" class="{% if tab == 'general' %}active{% endif %}">General</a>
+    <a href="/settings/mock" class="{% if tab == 'mock' %}active{% endif %}">Mock</a>
+    <a href="/settings/models" class="{% if tab == 'models' %}active{% endif %}">Models</a>
+    <a href="/settings/transfer" class="{% if tab == 'transfer' %}active{% endif %}">Transfer</a>
+  </nav>
+</div>
+
+<article>
+  <header><strong>General</strong></header>
+  <form method="POST" action="/settings/save">
+    <input type="hidden" name="tab" value="general">
+    <div class="grid">
+      <label>
+        Service Mode
+        <select name="service_mode">
+          <option value="mock" {% if settings.service_mode == 'mock' %}selected{% endif %}>Mock</option>
+          <option value="real" {% if settings.service_mode == 'real' %}selected{% endif %}>Real</option>
+        </select>
+        <small>Mock: return simulated responses. Real: use ComfyUI for image/video generation.</small>
+      </label>
+    </div>
+    <button type="submit">Save</button>
+  </form>
+</article>
+
+<article>
+  <header><strong>Server Info</strong></header>
+  <table>
+    <tr><td>Host</td><td><code>{{ settings.host }}</code></td></tr>
+    <tr><td>Port</td><td><code>{{ settings.port }}</code></td></tr>
+    <tr><td>Network URL</td><td><code>{{ network_url }}</code></td></tr>
+  </table>
+</article>
+{% endblock %}

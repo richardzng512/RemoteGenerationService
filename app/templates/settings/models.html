@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% block title %}Model Settings — RemoteGenerationService{% endblock %}
+
+{% block content %}
+<h1>Settings</h1>
+
+<div class="settings-tabs">
+  <nav>
+    <a href="/settings">General</a>
+    <a href="/settings/mock">Mock</a>
+    <a href="/settings/models" class="active">Models</a>
+    <a href="/settings/transfer">Transfer</a>
+  </nav>
+</div>
+
+<!-- ComfyUI Config -->
+<article>
+  <header><strong>ComfyUI</strong></header>
+  <form method="POST" action="/settings/save">
+    <input type="hidden" name="tab" value="models">
+    <label>
+      ComfyUI URL
+      <input type="url" name="comfyui_base_url" value="{{ settings.comfyui_base_url }}"
+             placeholder="http://localhost:8188">
+      <small>Make sure ComfyUI is started with the <code>--listen</code> flag.</small>
+    </label>
+    <div class="grid">
+      <button type="submit">Save</button>
+      <button type="button" class="outline"
+        hx-get="/api/real/comfyui/status"
+        hx-target="#comfyui-status"
+        hx-swap="innerHTML">
+        Test Connection
+      </button>
+    </div>
+    <div id="comfyui-status"
+      hx-get="/api/real/comfyui/status-partial"
+      hx-trigger="load"
+      hx-swap="innerHTML">
+    </div>
+  </form>
+</article>
+
+<!-- Workflow Management -->
+<article x-data="workflows()">
+  <header>
+    <strong>ComfyUI Workflow Templates</strong>
+  </header>
+  <p>Upload ComfyUI workflow JSON files. These will be selectable when generating images or videos.</p>
+
+  <!-- Upload -->
+  <form hx-post="/api/real/comfyui/workflows/upload"
+        hx-encoding="multipart/form-data"
+        hx-target="#workflow-list"
+        hx-swap="innerHTML">
+    <div class="grid" style="align-items: end;">
+      <label>
+        Workflow JSON File
+        <input type="file" name="file" accept=".json" required>
+      </label>
+      <button type="submit">Upload</button>
+    </div>
+  </form>
+
+  <!-- Workflow list -->
+  <div id="workflow-list"
+    hx-get="/api/real/comfyui/workflows-partial"
+    hx-trigger="load"
+    hx-swap="innerHTML">
+    <div><span class="spinner"></span> Loading...</div>
+  </div>
+</article>
+
+<script>
+function workflows() { return {}; }
+</script>
+{% endblock %}

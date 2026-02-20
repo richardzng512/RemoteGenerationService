@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% block title %}Generate Video — RemoteGenerationService{% endblock %}
+
+{% block content %}
+<h1>🎬 Generate Video</h1>
+
+{% if mode == 'real' and not workflows %}
+<div class="flash flash-warning">
+  ⚠️ No ComfyUI workflows found. <a href="/settings/models">Upload a workflow</a> first.
+</div>
+{% endif %}
+
+<form method="POST" action="/generate/video/submit">
+  <label>
+    Prompt
+    <textarea name="prompt" rows="4" placeholder="A cinematic aerial shot of a mountain range at sunset..." required></textarea>
+  </label>
+  <label>
+    Negative Prompt
+    <textarea name="negative_prompt" rows="2" placeholder="blurry, watermark..."></textarea>
+  </label>
+
+  {% if mode == 'real' %}
+  <label>
+    Workflow
+    <select name="workflow" required>
+      {% for wf in workflows %}
+      <option value="{{ wf }}">{{ wf }}</option>
+      {% endfor %}
+    </select>
+  </label>
+  {% else %}
+  <input type="hidden" name="workflow" value="">
+  {% endif %}
+
+  <div class="grid">
+    <label>
+      Width
+      <select name="width">
+        {% for w in [512, 768, 1024] %}
+        <option value="{{ w }}" {% if w == 512 %}selected{% endif %}>{{ w }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <label>
+      Height
+      <select name="height">
+        {% for h in [512, 768, 1024] %}
+        <option value="{{ h }}" {% if h == 512 %}selected{% endif %}>{{ h }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <label>
+      Frames
+      <input type="number" name="frames" value="16" min="1" max="200">
+    </label>
+    <label>
+      FPS
+      <input type="number" name="fps" value="8" min="1" max="60">
+    </label>
+    <label>
+      Steps
+      <input type="number" name="steps" value="20" min="1" max="150">
+    </label>
+    <label>
+      Seed (-1 = random)
+      <input type="number" name="seed" value="-1">
+    </label>
+  </div>
+
+  <button type="submit">
+    {% if mode == 'real' %}🚀 Generate (Real){% else %}🎭 Generate (Mock){% endif %}
+  </button>
+</form>
+{% endblock %}

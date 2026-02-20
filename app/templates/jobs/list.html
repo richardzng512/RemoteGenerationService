@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block title %}Jobs — RemoteGenerationService{% endblock %}
+
+{% block content %}
+<div x-data="jobList()">
+  <h1>Jobs</h1>
+
+  <!-- Filters -->
+  <form method="GET" action="/jobs" class="grid" style="align-items: end; gap: 0.5rem; margin-bottom: 1rem;">
+    <label>
+      Status
+      <select name="status">
+        <option value="">All</option>
+        {% for s in ['pending','running','completed','failed','cancelled'] %}
+        <option value="{{ s }}" {% if status_filter == s %}selected{% endif %}>{{ s|title }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <label>
+      Type
+      <select name="job_type">
+        <option value="">All</option>
+        {% for t in ['llm','image','video'] %}
+        <option value="{{ t }}" {% if type_filter == t %}selected{% endif %}>{{ t|upper }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <button type="submit">Filter</button>
+  </form>
+
+  <!-- Job Table -->
+  <div id="job-table"
+    hx-get="/api/jobs-table?status={{ status_filter or '' }}&job_type={{ type_filter or '' }}&page={{ page }}"
+    hx-trigger="load, every 3s"
+    hx-swap="innerHTML">
+    <div><span class="spinner"></span> Loading...</div>
+  </div>
+</div>
+
+<script>
+function jobList() { return {}; }
+</script>
+{% endblock %}

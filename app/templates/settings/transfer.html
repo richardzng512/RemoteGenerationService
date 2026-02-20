@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+{% block title %}Transfer Settings — RemoteGenerationService{% endblock %}
+
+{% block content %}
+<h1>Settings</h1>
+
+<div class="settings-tabs">
+  <nav>
+    <a href="/settings">General</a>
+    <a href="/settings/mock">Mock</a>
+    <a href="/settings/models">Models</a>
+    <a href="/settings/transfer" class="active">Transfer</a>
+  </nav>
+</div>
+
+<article x-data="{ mode: '{{ settings.transfer_mode }}' }">
+  <header><strong>File Transfer</strong></header>
+  <form method="POST" action="/settings/save">
+    <input type="hidden" name="tab" value="transfer">
+
+    <fieldset>
+      <legend>Transfer Mode</legend>
+      <label>
+        <input type="radio" name="transfer_mode" value="http"
+               x-model="mode" {% if settings.transfer_mode == 'http' %}checked{% endif %}>
+        HTTP (default) — files are downloadable from this service over the network
+      </label>
+      <label>
+        <input type="radio" name="transfer_mode" value="smb"
+               x-model="mode" {% if settings.transfer_mode == 'smb' %}checked{% endif %}>
+        SMB — push files to a Windows network share automatically
+      </label>
+    </fieldset>
+
+    <!-- HTTP info -->
+    <div x-show="mode === 'http'" style="margin: 1rem 0;">
+      <article style="background: var(--code-background-color);">
+        <p>Files will be served at:</p>
+        <code>{{ network_url }}/outputs/</code>
+        <p><small>Other machines on your LAN can download files using this URL.</small></p>
+      </article>
+    </div>
+
+    <!-- SMB config -->
+    <div x-show="mode === 'smb'">
+      <div class="grid">
+        <label>
+          SMB Server (hostname or IP)
+          <input type="text" name="smb_server" value="{{ settings.smb_server }}"
+                 placeholder="192.168.1.100">
+        </label>
+        <label>
+          Share Name
+          <input type="text" name="smb_share" value="{{ settings.smb_share }}"
+                 placeholder="GeneratedFiles">
+        </label>
+      </div>
+      <div class="grid">
+        <label>
+          Username
+          <input type="text" name="smb_username" value="{{ settings.smb_username }}">
+        </label>
+        <label>
+          Password
+          <input type="password" name="smb_password" value="{{ settings.smb_password }}">
+        </label>
+      </div>
+      <label>
+        Target Path (on the share)
+        <input type="text" name="smb_target_path" value="{{ settings.smb_target_path }}"
+               placeholder="/GeneratedFiles">
+      </label>
+    </div>
+
+    <button type="submit">Save</button>
+  </form>
+</article>
+{% endblock %}

@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}RemoteGenerationService{% endblock %}</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css">
+  <link rel="stylesheet" href="/static/css/app.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3/dist/cdn.min.js"></script>
+  <script src="https://unpkg.com/htmx.org@2/dist/htmx.min.js"></script>
+</head>
+<body>
+  <header class="container-fluid">
+    <nav>
+      <ul>
+        <li><strong><a href="/" class="contrast">⚡ RemoteGenSvc</a></strong></li>
+      </ul>
+      <ul>
+        <li><a href="/jobs">Jobs</a></li>
+        <li><a href="/generate/image">Generate</a></li>
+        <li><a href="/settings">Settings</a></li>
+        <li>
+          <span id="mode-badge"
+            class="badge {% if mode == 'real' %}badge-real{% else %}badge-mock{% endif %}">
+            {% if mode == 'real' %}🟢 Real{% else %}🟡 Mock{% endif %}
+          </span>
+        </li>
+      </ul>
+    </nav>
+  </header>
+
+  <main class="container">
+    {% if flash %}
+    <div class="flash flash-{{ flash.type }}">{{ flash.message }}</div>
+    {% endif %}
+
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer class="container-fluid">
+    <small>RemoteGenerationService &bull; <a href="/docs" target="_blank">API Docs</a></small>
+  </footer>
+
+  <script src="/static/js/app.js"></script>
+</body>
+</html>

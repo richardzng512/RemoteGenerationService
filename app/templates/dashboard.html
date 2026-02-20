@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% block title %}Dashboard — RemoteGenerationService{% endblock %}
+
+{% block content %}
+<div x-data="dashboard()">
+  <div class="grid" style="grid-template-columns: 1fr auto; align-items: center; margin-bottom: 1rem;">
+    <div>
+      <h1 style="margin: 0;">Dashboard</h1>
+      <small>Network address: <code>{{ network_url }}</code></small>
+    </div>
+    <div>
+      <form method="POST" action="/settings/mode" style="display:inline;">
+        <input type="hidden" name="mode" value="{{ 'mock' if mode == 'real' else 'real' }}">
+        <button type="submit" class="{% if mode == 'real' %}outline{% endif %}" style="margin: 0;">
+          Switch to {{ 'Mock' if mode == 'real' else 'Real' }} mode
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Service Status -->
+  <article>
+    <header><strong>Service Status</strong></header>
+    <div class="grid" id="service-status"
+      hx-get="/api/status"
+      hx-trigger="load, every 30s"
+      hx-swap="innerHTML">
+      <div><span class="spinner"></span> Checking...</div>
+    </div>
+  </article>
+
+  <!-- Stats -->
+  <div class="grid stats-grid"
+    id="stats"
+    hx-get="/api/stats-partial"
+    hx-trigger="load, every 10s"
+    hx-swap="innerHTML">
+    <div class="stat-card"><span class="spinner"></span></div>
+  </div>
+
+  <!-- Recent Jobs -->
+  <article>
+    <header>
+      <strong>Recent Jobs</strong>
+      <a href="/jobs" style="float:right; font-size: 0.85rem;">View all →</a>
+    </header>
+    <div id="recent-jobs"
+      hx-get="/api/jobs-partial"
+      hx-trigger="load, every 5s"
+      hx-swap="innerHTML">
+      <div><span class="spinner"></span> Loading...</div>
+    </div>
+  </article>
+
+  <!-- Quick Actions -->
+  <div class="grid">
+    <a href="/generate/llm" role="button" class="outline">💬 Generate Text</a>
+    <a href="/generate/image" role="button" class="outline">🖼️ Generate Image</a>
+    <a href="/generate/video" role="button" class="outline">🎬 Generate Video</a>
+  </div>
+</div>
+
+<script>
+function dashboard() {
+  return {};
+}
+</script>
+{% endblock %}

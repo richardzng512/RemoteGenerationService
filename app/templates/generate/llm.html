@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}Generate Text — RemoteGenerationService{% endblock %}
+
+{% block content %}
+<h1>💬 Generate Text</h1>
+{% if mode == 'real' %}
+<div class="flash flash-info">ℹ️ LLM is always in Mock mode. Switch to Mock in the mode indicator.</div>
+{% endif %}
+
+<form method="POST" action="/generate/llm/submit">
+  <label>
+    System Prompt (optional)
+    <textarea name="system_prompt" rows="3" placeholder="You are a helpful assistant."></textarea>
+  </label>
+  <label>
+    User Message
+    <textarea name="user_message" rows="5" placeholder="Enter your message..." required></textarea>
+  </label>
+  <div class="grid">
+    <label>
+      Model (mock)
+      <input type="text" name="model" value="gpt-4o" placeholder="gpt-4o">
+    </label>
+    <label>
+      Temperature
+      <input type="number" name="temperature" value="0.7" min="0" max="2" step="0.1">
+    </label>
+    <label>
+      Max Tokens (optional)
+      <input type="number" name="max_tokens" placeholder="leave blank for default">
+    </label>
+  </div>
+  <button type="submit">Generate</button>
+</form>
+{% endblock %}
